@@ -3,247 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cellularium - Redesign</title>
+    <title>Cellularium - Pro</title>
     <style>
         :root {
-            --bg: #101014;
-            --panel: #1b1b22;
-            --panel-border: #30363d;
-            --text: #dce0e6;
-            --text-dim: #8b949e;
+            --bg: #050505;
+            --panel-bg: rgba(22, 27, 34, 0.85); /* Semi-transparent */
+            --panel-border: rgba(48, 54, 61, 0.5);
+            --text: #e6edf3;
+            --text-dim: #7d8590;
             --accent: #58a6ff;
-            --accent-green: #2ea043;
-            --danger: #da3633;
-            --control-h: 60px;
+            --accent-glow: rgba(88, 166, 255, 0.3);
+            --danger: #f85149;
+            --success: #2ea043;
+            --radius: 8px;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            margin: 0; font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg); color: var(--text);
             display: flex; flex-direction: column;
             height: 100vh; overflow: hidden;
         }
 
-        /* --- UI COMPONENTS --- */
-        select, input[type="range"] {
-            background: #0d1117; border: 1px solid var(--panel-border);
-            color: white; border-radius: 6px; height: 36px; padding: 0 8px;
-            font-size: 14px; width: 100%;
+        /* --- STYLED INPUTS (Custom Range) --- */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent; height: 20px; cursor: pointer;
         }
-        select:focus, input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+        input[type=range]:focus { outline: none; }
+        
+        /* Piste du slider */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: #30363d; border-radius: 3px;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: #30363d; border-radius: 3px;
+        }
+        
+        /* Bouton du slider (Thumb) */
+        input[type=range]::-webkit-slider-thumb {
+            height: 18px; width: 18px; border-radius: 50%;
+            background: var(--text); border: 2px solid var(--bg);
+            cursor: pointer; -webkit-appearance: none;
+            margin-top: -6px; /* Alignement vertical */
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 18px; width: 18px; border: none; border-radius: 50%;
+            background: var(--text); cursor: pointer;
+        }
 
-        label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+        select {
+            background: #21262d; border: 1px solid var(--panel-border);
+            color: white; border-radius: var(--radius); height: 36px; padding: 0 10px;
+            font-size: 14px; width: 100%; appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat; background-position: right 10px center; background-size: 10px;
+        }
 
+        /* --- BUTTONS --- */
         button {
-            border: 1px solid var(--panel-border); border-radius: 6px;
+            border: 1px solid var(--panel-border); border-radius: var(--radius);
             background: #21262d; color: var(--text); cursor: pointer;
-            font-weight: 600; transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            height: 40px;
+            font-weight: 600; font-size: 0.9rem; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
         }
         button:active { transform: scale(0.96); }
-        button.active { background: var(--accent); color: #0d1117; border-color: var(--accent); }
-        button.danger { color: var(--danger); border-color: rgba(218, 54, 51, 0.3); }
-        button.danger:hover { background: var(--danger); color: white; }
+        
+        /* Bouton Play Actif */
+        button.is-playing {
+            background: rgba(46, 160, 67, 0.15);
+            color: var(--success);
+            border-color: var(--success);
+            box-shadow: 0 0 10px rgba(46, 160, 67, 0.2);
+        }
+        
+        button.danger { color: var(--danger); }
+        button.danger:hover { background: rgba(248, 81, 73, 0.1); border-color: var(--danger); }
 
-        /* --- TOP HEADER (Configuration) --- */
+        /* --- LAYOUT --- */
         #top-bar {
-            background: var(--panel); border-bottom: 1px solid var(--panel-border);
-            padding: 10px 15px; display: flex; flex-direction: column; gap: 10px;
-            z-index: 10; flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            background: var(--panel-bg); 
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--panel-border);
+            padding: 10px 15px; display: flex; flex-direction: column; gap: 12px;
+            z-index: 20; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
-        .row-group {
-            display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;
-        }
-        .control-item { flex: 1; min-width: 140px; }
-
-        /* Style spécifique pour le groupe bruit (slider + dé) */
-        .noise-group { display: flex; gap: 5px; }
-        .noise-group input { flex: 1; }
-        .noise-group button { width: 40px; height: 36px; margin: 0; }
-
-        /* Infos & Graph overlay (Collapsible style to save space) */
-        #stats-bar {
-            display: flex; gap: 15px; align-items: center; justify-content: space-between;
-            font-size: 0.85rem; color: var(--text-dim);
-            padding: 5px 0; border-top: 1px solid #30363d; margin-top: 5px;
-        }
-        #graph-mini-container {
-            width: 100px; height: 30px; background: #000; border: 1px solid #333; position: relative;
+        .controls-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
         }
 
-        /* --- MAIN VIEWPORT (Grille) --- */
+        .label-row {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 5px; color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        /* --- GRAPH & STATS --- */
+        #stats-strip {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-top: 8px; border-top: 1px solid var(--panel-border);
+            font-size: 0.85rem; font-family: 'SF Mono', 'Consolas', monospace; /* Monospace pour éviter le tremblement */
+        }
+        
+        #graph-container {
+            width: 120px; height: 36px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px; overflow: hidden;
+            border: 1px solid var(--panel-border);
+            position: relative;
+        }
+
+        /* --- VIEWPORT --- */
         #viewport {
-            flex: 1; position: relative; background: #050505;
+            flex: 1; position: relative;
+            background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+            background-size: 20px 20px; /* Petit motif de fond subtil */
             display: flex; align-items: center; justify-content: center;
-            overflow: hidden; touch-action: none;
+            overflow: hidden;
         }
         
         #canvas-wrapper {
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            box-shadow: 0 0 60px rgba(0,0,0,0.6);
             border: 1px solid #333;
             background: #000;
-        }
-        canvas#grid { display: block; image-rendering: pixelated; }
-
-        /* HUD flottant pour l'info règle */
-        .hud-rule-info {
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(27, 27, 34, 0.85); backdrop-filter: blur(4px);
-            padding: 6px 12px; border-radius: 20px; border: 1px solid var(--panel-border);
-            font-size: 0.8rem; pointer-events: none; text-align: center;
-            max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            transition: box-shadow 0.3s;
         }
 
-        /* --- BOTTOM BAR (Contrôles Playback) --- */
+        /* --- BOTTOM BAR --- */
         #bottom-bar {
-            background: var(--panel); border-top: 1px solid var(--panel-border);
-            padding: 10px 15px; flex-shrink: 0; z-index: 10;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--panel-border);
+            padding: 10px 15px; z-index: 20;
             padding-bottom: max(10px, env(safe-area-inset-bottom));
         }
 
-        .playback-controls {
-            display: flex; gap: 10px; align-items: center; margin-bottom: 10px;
-        }
-        .playback-controls button { flex: 1; height: 44px; font-size: 1rem; }
+        .control-bar { display: flex; gap: 10px; height: 44px; }
+        .btn-large { flex: 1; height: 100%; font-size: 1rem; }
         
-        .speed-control {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 8px;
-        }
-        .speed-control input { margin: 0; height: 24px; }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 600px) {
-            h1 { display: none; } /* On cache le titre sur mobile pour gagner de la place */
-            .row-group { gap: 8px; }
-            .control-item { min-width: 45%; } /* 2 items par ligne sur mobile */
-            
-            /* Réorganiser pour que zoom/bruit soient compacts */
-            #top-bar { padding: 8px; }
-            select { font-size: 16px; } /* Evite le zoom auto sur iOS */
+        /* Responsive adjustments */
+        @media (min-width: 700px) {
+            .controls-grid { grid-template-columns: repeat(4, 1fr); align-items: end; }
+            #stats-strip { justify-content: flex-end; gap: 20px; }
         }
     </style>
 </head>
 <body>
 
     <div id="top-bar">
-        <div class="row-group">
-            <div class="control-item">
-                <label>1. Règle de l'Univers</label>
+        <div class="controls-grid">
+            <div>
+                <div class="label-row"><span>Règle</span></div>
                 <select id="select-rule"></select>
             </div>
-            <div class="control-item">
-                <label>2. Insérer Forme</label>
+            <div>
+                <div class="label-row"><span>Insérer</span></div>
                 <select id="select-pattern">
                     <option value="">-- Choisir --</option>
                 </select>
             </div>
-        </div>
-
-        <div class="row-group" style="margin-top:5px;">
-            <div class="control-item">
-                <label>3. Zoom / Taille Grille</label>
+            <div>
+                <div class="label-row"><span>Zoom</span> <span id="val-zoom" style="color:var(--accent)">10</span></div>
                 <input type="range" id="range-zoom" min="2" max="40" value="10">
             </div>
-            <div class="control-item">
-                <label>4. Bruit Aléatoire</label>
-                <div class="noise-group">
-                    <input type="range" id="range-density" min="5" max="50" value="20">
-                    <button id="btn-random">🎲</button>
+            <div>
+                <div class="label-row">
+                    <span>Densité</span>
+                    <button id="btn-random" style="padding: 2px 8px; height:auto; font-size:12px;">🎲 Aléatoire</button>
                 </div>
+                <input type="range" id="range-density" min="5" max="50" value="20">
             </div>
         </div>
 
-        <div id="stats-bar">
-            <div>Gén: <strong id="lbl-gen" style="color:var(--accent)">0</strong></div>
-            <div>Pop: <strong id="lbl-pop">0</strong></div>
-            <div style="display:flex; align-items:center; gap:5px;">
-                <label style="margin:0; cursor:pointer;"><input type="checkbox" id="chk-wrap" checked> Monde Torique</label>
+        <div id="stats-strip">
+            <div style="display:flex; gap:15px; align-items:center;">
+                <span>GEN: <span id="lbl-gen" style="color:var(--accent)">0</span></span>
+                <span>POP: <span id="lbl-pop">0</span></span>
             </div>
-            <div id="graph-mini-container">
-                <canvas id="population-graph" width="100" height="30"></canvas>
+            
+            <div style="display:flex; align-items:center; gap:10px;">
+                <label style="display:flex; align-items:center; cursor:pointer; font-size:12px; color:var(--text-dim);">
+                    <input type="checkbox" id="chk-wrap" checked style="margin-right:5px;"> Tore
+                </label>
+                <div id="graph-container">
+                    <canvas id="population-graph" width="120" height="36"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="viewport">
-        <div class="hud-rule-info">
-            <span id="info-title" style="color:var(--accent); font-weight:bold;">Life</span> : 
-            <span id="info-desc-short" style="color:var(--text-dim)">Classic</span>
-        </div>
         <div id="canvas-wrapper">
             <canvas id="grid"></canvas>
         </div>
     </div>
 
     <div id="bottom-bar">
-        <div class="playback-controls">
-            <button id="btn-play">▶ Lecture</button>
-            <button id="btn-step">⏯ Pas</button>
-            <button id="btn-clear" class="danger">🗑 Reset</button>
+        <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; color:var(--text-dim); font-size:12px;">
+            <span>VITESSE</span>
+            <span id="speed-val">30 fps</span>
         </div>
-
-        <div class="speed-control">
-            <label style="margin:0; white-space:nowrap;">🐢 Vitesse</label>
-            <input type="range" id="range-speed" min="1" max="60" value="30" style="flex:1;">
-            <label style="margin:0;">🐇</label>
+        <input type="range" id="range-speed" min="1" max="60" value="30" style="margin-bottom:15px;">
+        
+        <div class="control-bar">
+            <button id="btn-play" class="btn-large">▶ Lecture</button>
+            <button id="btn-step" class="btn-large">⏯ Pas</button>
+            <button id="btn-clear" class="btn-large danger">🗑 Reset</button>
         </div>
     </div>
 
 <script>
-/* --- CONFIGURATION ET DONNÉES (Identique à l'original) --- */
-
+/* --- DATA & CONFIG --- */
 const RULES = {
-    "life": { name: "Conway's Life", type: "life", states: 2, B: [3], S: [2,3], colors: ['#000000', '#58a6ff'], desc: "Naît avec 3, survit avec 2 ou 3." },
-    "highlife": { name: "HighLife", type: "life", states: 2, B: [3,6], S: [2,3], colors: ['#000000', '#d2a8ff'], desc: "Naît avec 3 ou 6. Possède le Replicator." },
-    "daynight": { name: "Day & Night", type: "life", states: 2, B: [3,6,7,8], S: [3,4,6,7,8], colors: ['#000000', '#ffa657'], desc: "Symétrique et complexe." },
-    "morley": { name: "Morley", type: "life", states: 2, B: [3,6,8], S: [2,4,5], colors: ['#000000', '#ff7b72'], desc: "Génère beaucoup de vaisseaux." },
-    "brain": { name: "Brian's Brain", type: "gens", states: 3, B: [2], S: [], colors: ['#000000', '#7ee787', '#ff7b72'], desc: "3 états : Prêt > Actif > Réfractaire." },
-    "starwars": { name: "Star Wars", type: "gens", states: 4, B: [2], S: [3,4,5], colors: ['#000000', '#79c0ff', '#1f6feb', '#ff7b72'], desc: "Flottes de vaisseaux." },
-    "wireworld": { name: "WireWorld", type: "wire", states: 4, colors: ['#101010', '#ffffff', '#ff5555', '#ffcc00'], desc: "Simulation électronique." }
+    "life": { name: "Conway's Life", type: "life", states: 2, B: [3], S: [2,3], colors: ['#000000', '#58a6ff'] },
+    "highlife": { name: "HighLife", type: "life", states: 2, B: [3,6], S: [2,3], colors: ['#000000', '#d2a8ff'] },
+    "daynight": { name: "Day & Night", type: "life", states: 2, B: [3,6,7,8], S: [3,4,6,7,8], colors: ['#000000', '#ffa657'] },
+    "brain": { name: "Brian's Brain", type: "gens", states: 3, B: [2], S: [], colors: ['#000000', '#7ee787', '#ff7b72'] },
+    "starwars": { name: "Star Wars", type: "gens", states: 4, B: [2], S: [3,4,5], colors: ['#000000', '#79c0ff', '#1f6feb', '#ff7b72'] },
+    "wireworld": { name: "WireWorld", type: "wire", states: 4, colors: ['#101010', '#ffffff', '#ff5555', '#ffcc00'] }
 };
 
 const PATTERNS = [
     { id: "glider", name: "Planeur", cat: "Classique", rule: "life", coords: [[1,0],[2,1],[0,2],[1,2],[2,2]] },
-    { id: "pentadecathlon", name: "Pentadecathlon", cat: "Classique", rule: "life", coords: [[0,0],[1,0], [3,0],[4,0],[5,0],[6,0], [8,0],[9,0], [2,-1],[7,-1], [2,1],[7,1]] },
     { id: "pulsar", name: "Pulsar", cat: "Classique", rule: "life", coords: [[2,0],[3,0],[4,0],[8,0],[9,0],[10,0], [0,2],[5,2],[7,2],[12,2], [0,3],[5,3],[7,3],[12,3], [0,4],[5,4],[7,4],[12,4], [2,5],[3,5],[4,5],[8,5],[9,5],[10,5]] },
-    { id: "r-pentomino", name: "R-Pentomino", cat: "Chaos", rule: "life", coords: [[1,0],[2,0],[0,1],[1,1],[1,2]] },
-    { id: "diehard", name: "Diehard", cat: "Chaos", rule: "life", coords: [[6,0], [0,1],[1,1], [1,2],[5,2],[6,2],[7,2]] },
-    { id: "acorn", name: "Acorn", cat: "Chaos", rule: "life", coords: [[1,0], [3,1], [0,2],[1,2], [4,2],[5,2],[6,2]] },
     { id: "gosper", name: "Gosper Gun", cat: "Complexe", rule: "life", coords: [[24,0],[22,1],[24,1],[12,2],[13,2],[20,2],[21,2],[34,2],[35,2],[11,3],[15,3],[20,3],[21,3],[34,3],[35,3],[0,4],[1,4],[10,4],[16,4],[20,4],[21,4],[0,5],[1,5],[10,5],[14,5],[16,5],[17,5],[22,5],[24,5],[10,6],[16,6],[24,6],[11,7],[15,7],[12,8],[13,8]] },
-    { id: "replicator", name: "Replicator", cat: "HighLife", rule: "highlife", coords: [[2,0],[3,0],[4,0], [1,1],[4,1], [0,2],[4,2], [0,3],[3,3], [0,4],[1,4],[2,4]] },
     { id: "butterfly", name: "Butterfly", cat: "Generations", rule: "brain", coords: [[1,0,1],[2,0,2], [0,1,2],[1,1,2],[2,1,1],[3,1,2], [1,2,2],[2,2,2],[3,2,1]] },
     { id: "logic", name: "Diode", cat: "Électronique", rule: "wireworld", coords: [[0,5,3],[1,5,3],[2,5,3],[3,5,3],[4,5,3],[5,5,3],[6,5,3],[7,5,3],[8,5,3],[9,5,3],[10,5,3],[1,5,1],[0,5,2],[6,4,3],[7,4,3], [6,6,3],[7,6,3], [8,5,3]] }
 ];
 
-/* --- MOTEUR --- */
+/* --- ENGINE --- */
 const canvas = document.getElementById('grid');
 const ctx = canvas.getContext('2d', { alpha: false });
 const wrapper = document.getElementById('canvas-wrapper');
 
-let config = { cellSize: 10, speed: 30, wrap: true, cols: 0, rows: 0 }; // Default zoom 10
+let config = { cellSize: 10, speed: 30, wrap: true, cols: 0, rows: 0 };
 let grid = [], nextGrid = [];
-let isPlaying = false, animationId, lastTime = 0, generation = 0;
+let isPlaying = false, lastTime = 0, generation = 0;
 let currentRule = RULES.life;
 
-// Graph
+// Graph Vars
 const graphCanvas = document.getElementById('population-graph');
 const graphCtx = graphCanvas.getContext('2d');
-let populationHistory = [];
-const MAX_HISTORY_POINTS = 50; // Graphique plus court pour le design compact
+let popHistory = new Array(60).fill(0); // Fixed size buffer
 
 // Init UI
 const ruleSelect = document.getElementById('select-rule');
-Object.keys(RULES).forEach(key => {
-    let opt = document.createElement('option');
-    opt.value = key; opt.textContent = RULES[key].name;
-    ruleSelect.appendChild(opt);
-});
+Object.keys(RULES).forEach(k => ruleSelect.add(new Option(RULES[k].name, k)));
 
 const patSelect = document.getElementById('select-pattern');
 let lastCat = "";
@@ -251,11 +260,10 @@ PATTERNS.forEach(p => {
     if(p.cat !== lastCat) {
         let g = document.createElement('optgroup'); g.label = p.cat; patSelect.appendChild(g); lastCat = p.cat;
     }
-    let opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name;
-    patSelect.lastChild.appendChild(opt);
+    patSelect.lastChild.appendChild(new Option(p.name, p.id));
 });
 
-/* --- LOGIQUE --- */
+/* --- CORE LOGIC --- */
 function getIdx(x, y) {
     if (config.wrap) { x = (x + config.cols) % config.cols; y = (y + config.rows) % config.rows; }
     else if (x < 0 || x >= config.cols || y < 0 || y >= config.rows) return -1;
@@ -268,9 +276,7 @@ function countNeighbors(x, y, type) {
         for(let dx=-1; dx<=1; dx++) {
             if(!dx && !dy) continue;
             const idx = getIdx(x+dx, y+dy);
-            if(idx === -1) continue;
-            const val = grid[idx];
-            if ((type === 'life' || type === 'gens' || type === 'wire') && val === 1) n++;
+            if(idx !== -1 && grid[idx] === 1) n++;
         }
     }
     return n;
@@ -278,85 +284,112 @@ function countNeighbors(x, y, type) {
 
 function update() {
     let active = 0;
-    for (let y=0; y<config.rows; y++) {
-        for (let x=0; x<config.cols; x++) {
-            const idx = y * config.cols + x;
-            const s = grid[idx];
-            let ns = 0;
+    const type = currentRule.type;
+    const isLife = type === 'life';
+    const isWire = type === 'wire';
 
-            if (currentRule.type === 'life') {
-                const n = countNeighbors(x, y, 'life');
-                if (s === 1) ns = currentRule.S.includes(n) ? 1 : 0;
-                else ns = currentRule.B.includes(n) ? 1 : 0;
-            } else if (currentRule.type === 'gens') {
-                if (s === 0) ns = currentRule.B.includes(countNeighbors(x, y, 'gens')) ? 1 : 0;
-                else if (s === 1) ns = currentRule.S.includes(countNeighbors(x, y, 'gens')) ? 1 : 2;
-                else { ns = s + 1; if (ns >= currentRule.states) ns = 0; }
-            } else if (currentRule.type === 'wire') {
-                if (s === 1) ns = 2; else if (s === 2) ns = 3;
-                else if (s === 3) {
-                    const n = countNeighbors(x, y, 'wire');
-                    ns = (n === 1 || n === 2) ? 1 : 3;
-                } else ns = 0;
-            }
+    for (let i = 0; i < grid.length; i++) {
+        // Fast coordinate calculation
+        const x = i % config.cols;
+        const y = Math.floor(i / config.cols);
+        const s = grid[i];
+        let ns = 0;
 
-            nextGrid[idx] = ns;
-            if(ns === 1) active++;
+        if (isLife) {
+            const n = countNeighbors(x, y, 'life');
+            if (s === 1) ns = currentRule.S.includes(n) ? 1 : 0;
+            else ns = currentRule.B.includes(n) ? 1 : 0;
+        } else if (type === 'gens') {
+            if (s === 0) ns = currentRule.B.includes(countNeighbors(x, y, 'gens')) ? 1 : 0;
+            else if (s === 1) ns = currentRule.S.includes(countNeighbors(x, y, 'gens')) ? 1 : 2;
+            else { ns = s + 1; if (ns >= currentRule.states) ns = 0; }
+        } else if (isWire) {
+            if (s === 1) ns = 2; else if (s === 2) ns = 3;
+            else if (s === 3) {
+                const n = countNeighbors(x, y, 'wire');
+                ns = (n === 1 || n === 2) ? 1 : 3;
+            } else ns = 0;
         }
+
+        nextGrid[i] = ns;
+        if(ns === 1) active++;
     }
+    
     [grid, nextGrid] = [nextGrid, grid];
     generation++;
     document.getElementById('lbl-gen').innerText = generation;
     document.getElementById('lbl-pop').innerText = active;
     
-    populationHistory.push(active);
-    if (populationHistory.length > MAX_HISTORY_POINTS) populationHistory.shift();
+    // Update Graph Data
+    popHistory.push(active);
+    popHistory.shift();
     updateGraph();
 }
 
-/* --- RENDU --- */
+/* --- NEW GRAPH RENDERING --- */
+function updateGraph() {
+    const w = graphCanvas.width;
+    const h = graphCanvas.height;
+    graphCtx.clearRect(0, 0, w, h);
+
+    const max = Math.max(...popHistory, 10);
+    const min = Math.min(...popHistory);
+    const range = max - min || 1;
+    const stepX = w / (popHistory.length - 1);
+
+    // 1. Draw Line
+    graphCtx.beginPath();
+    for(let i=0; i<popHistory.length; i++) {
+        const y = h - ((popHistory[i] - min) / range) * (h - 4) - 2; // Keep 2px padding
+        if(i===0) graphCtx.moveTo(0, y); else graphCtx.lineTo(i*stepX, y);
+    }
+    
+    // Stroke
+    graphCtx.strokeStyle = '#58a6ff';
+    graphCtx.lineWidth = 1.5;
+    graphCtx.stroke();
+
+    // 2. Gradient Fill (Sparkline effect)
+    graphCtx.lineTo(w, h);
+    graphCtx.lineTo(0, h);
+    const gradient = graphCtx.createLinearGradient(0, 0, 0, h);
+    gradient.addColorStop(0, "rgba(88, 166, 255, 0.4)");
+    gradient.addColorStop(1, "rgba(88, 166, 255, 0)");
+    graphCtx.fillStyle = gradient;
+    graphCtx.fill();
+
+    // 3. Dot at the end
+    const lastY = h - ((popHistory[popHistory.length-1] - min) / range) * (h - 4) - 2;
+    graphCtx.beginPath();
+    graphCtx.arc(w-2, lastY, 2, 0, Math.PI*2);
+    graphCtx.fillStyle = '#fff';
+    graphCtx.fill();
+}
+
 function draw() {
+    // Fill background
     ctx.fillStyle = currentRule.colors[0];
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     const sz = config.cellSize;
-    const pad = sz > 4 ? 1 : 0; 
-    for(let y=0; y<config.rows; y++) {
-        for(let x=0; x<config.cols; x++) {
-            const s = grid[y*config.cols + x];
-            if (s > 0) {
-                ctx.fillStyle = currentRule.colors[s] || '#fff';
-                ctx.fillRect(x*sz, y*sz, sz-pad, sz-pad);
-            }
+    // Si la cellule est assez grande (>4px), on laisse un pixel pour faire une grille (gap)
+    const gap = sz > 4 ? 1 : 0; 
+
+    for (let i = 0; i < grid.length; i++) {
+        const s = grid[i];
+        if (s > 0) {
+            const x = (i % config.cols) * sz;
+            const y = Math.floor(i / config.cols) * sz;
+            
+            ctx.fillStyle = currentRule.colors[s] || '#fff';
+            // Dessin avec gap pour l'effet grille
+            ctx.fillRect(x, y, sz - gap, sz - gap);
         }
     }
 }
 
-function updateGraph() {
-    // Version compacte du graphique
-    const w = graphCanvas.width;
-    const h = graphCanvas.height;
-    graphCtx.clearRect(0, 0, w, h);
-    if(populationHistory.length < 2) return;
-
-    let max = Math.max(...populationHistory, 10);
-    let min = Math.min(...populationHistory);
-    let range = max - min || 1;
-
-    graphCtx.beginPath();
-    graphCtx.strokeStyle = '#2ea043';
-    graphCtx.lineWidth = 1;
-
-    const stepX = w / (MAX_HISTORY_POINTS - 1);
-    for(let i=0; i<populationHistory.length; i++) {
-        const y = h - ((populationHistory[i] - min) / range) * h;
-        if(i===0) graphCtx.moveTo(i*stepX, y); else graphCtx.lineTo(i*stepX, y);
-    }
-    graphCtx.stroke();
-}
-
 function resize() {
     const rect = document.getElementById('viewport').getBoundingClientRect();
-    // On garde une marge pour l'esthétique
     const w = Math.floor(rect.width - 20);
     const h = Math.floor(rect.height - 20);
     
@@ -366,13 +399,10 @@ function resize() {
     config.cols = Math.ceil(w / config.cellSize);
     config.rows = Math.ceil(h / config.cellSize);
     
-    // On essaie de préserver le centre si possible, sinon reset
     grid = new Uint8Array(config.cols * config.rows);
     nextGrid = new Uint8Array(config.cols * config.rows);
-    
-    // Reset complet pour éviter les bugs d'affichage
-    generation = 0; populationHistory = [];
-    draw();
+    generation = 0; popHistory.fill(0);
+    draw(); updateGraph();
 }
 
 function loop(t) {
@@ -381,19 +411,14 @@ function loop(t) {
         draw();
         lastTime = t;
     }
-    animationId = requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
 }
 
 /* --- EVENTS --- */
 ruleSelect.addEventListener('change', (e) => {
     currentRule = RULES[e.target.value];
-    document.getElementById('info-title').innerText = currentRule.name;
-    document.getElementById('info-desc-short').innerText = currentRule.desc;
-    
-    grid.fill(0); generation = 0; populationHistory = [];
-    document.getElementById('lbl-gen').innerText = '0';
-    document.getElementById('lbl-pop').innerText = '0';
-    draw();
+    grid.fill(0); generation = 0; popHistory.fill(0);
+    draw(); updateGraph();
 });
 
 patSelect.addEventListener('change', (e) => {
@@ -401,11 +426,10 @@ patSelect.addEventListener('change', (e) => {
     if(!pid) return;
     const p = PATTERNS.find(x => x.id === pid);
     if(p.rule && p.rule !== ruleSelect.value) {
-        ruleSelect.value = p.rule;
-        ruleSelect.dispatchEvent(new Event('change'));
+        ruleSelect.value = p.rule; currentRule = RULES[p.rule];
     }
-    grid.fill(0); generation = 0; populationHistory = [];
     
+    grid.fill(0); generation = 0;
     const cx = Math.floor(config.cols/2);
     const cy = Math.floor(config.rows/2);
     p.coords.forEach(([dx, dy, st]) => {
@@ -416,71 +440,78 @@ patSelect.addEventListener('change', (e) => {
     patSelect.value = "";
 });
 
-// Interactions Souris / Touch
+// Drawing interaction
 let isDown = false;
-const handleStart = () => isDown = true;
-const handleEnd = () => isDown = false;
-const handleMove = (e) => { 
-    if(!isDown) return;
-    e.preventDefault(); // Empêche le scroll sur mobile
-    paint(e); 
-};
-
-canvas.addEventListener('mousedown', handleStart);
-canvas.addEventListener('touchstart', handleStart, {passive: false});
-window.addEventListener('mouseup', handleEnd);
-window.addEventListener('touchend', handleEnd);
-
-canvas.addEventListener('mousemove', handleMove);
-canvas.addEventListener('touchmove', (e) => {
-    if(isDown) {
-        // Touch events have different coords logic
-        const t = e.touches[0];
-        paint({ clientX: t.clientX, clientY: t.clientY });
-    }
-}, {passive: false});
-canvas.addEventListener('click', paint);
-
-function paint(e) {
+const getGridPos = (e) => {
     const rect = canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / config.cellSize);
-    const y = Math.floor((e.clientY - rect.top) / config.cellSize);
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+        x: Math.floor((clientX - rect.left) / config.cellSize),
+        y: Math.floor((clientY - rect.top) / config.cellSize)
+    };
+};
+const paint = (e) => {
+    const {x, y} = getGridPos(e);
     const idx = getIdx(x, y);
     if(idx !== -1) {
-        grid[idx] = (grid[idx] === 0) ? (currentRule.type === 'wire' ? 3 : 1) : 0;
+        grid[idx] = (currentRule.type === 'wire') ? 3 : 1;
         draw();
     }
-}
-
-// Contrôles
-document.getElementById('btn-play').onclick = function() {
-    isPlaying = !isPlaying;
-    this.textContent = isPlaying ? "⏸ Pause" : "▶ Lecture";
-    this.classList.toggle('active');
 };
+
+canvas.addEventListener('mousedown', () => isDown = true);
+window.addEventListener('mouseup', () => isDown = false);
+canvas.addEventListener('mousemove', (e) => { if(isDown) paint(e); });
+canvas.addEventListener('click', paint);
+
+canvas.addEventListener('touchstart', (e) => { isDown = true; paint(e); e.preventDefault(); }, {passive:false});
+window.addEventListener('touchend', () => isDown = false);
+canvas.addEventListener('touchmove', (e) => { if(isDown) paint(e); e.preventDefault(); }, {passive:false});
+
+// Buttons
+const btnPlay = document.getElementById('btn-play');
+btnPlay.onclick = function() {
+    isPlaying = !isPlaying;
+    if(isPlaying) {
+        this.innerHTML = "⏸ Pause";
+        this.classList.add('is-playing');
+    } else {
+        this.innerHTML = "▶ Lecture";
+        this.classList.remove('is-playing');
+    }
+};
+
 document.getElementById('btn-step').onclick = () => { update(); draw(); };
 document.getElementById('btn-clear').onclick = () => { 
-    grid.fill(0); generation = 0; populationHistory = []; 
+    grid.fill(0); generation = 0; popHistory.fill(0);
     document.getElementById('lbl-gen').innerText = '0';
     document.getElementById('lbl-pop').innerText = '0';
     draw(); updateGraph();
 };
+
 document.getElementById('btn-random').onclick = () => {
     const d = document.getElementById('range-density').value / 100;
-    for(let i=0; i<grid.length; i++) {
-        if(currentRule.type === 'wire') grid[i] = Math.random() < d ? 3 : 0; 
-        else grid[i] = Math.random() < d ? 1 : 0;
-    }
+    for(let i=0; i<grid.length; i++) grid[i] = Math.random() < d ? 1 : 0;
     generation = 0; draw();
 };
-document.getElementById('range-speed').oninput = (e) => config.speed = e.target.value;
-document.getElementById('range-zoom').oninput = (e) => { config.cellSize = parseInt(e.target.value); resize(); };
+
+document.getElementById('range-speed').oninput = (e) => {
+    config.speed = e.target.value;
+    document.getElementById('speed-val').innerText = config.speed + " fps";
+};
+
+document.getElementById('range-zoom').oninput = (e) => {
+    config.cellSize = parseInt(e.target.value);
+    document.getElementById('val-zoom').innerText = config.cellSize;
+    resize();
+};
+
 document.getElementById('chk-wrap').onchange = (e) => config.wrap = e.target.checked;
 
 // Init
-window.addEventListener('resize', () => { resize(); });
+window.addEventListener('resize', resize);
 resize();
-ruleSelect.value = "life"; ruleSelect.dispatchEvent(new Event('change'));
 loop(0);
 
 </script>
