@@ -3,772 +3,627 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeux de Conway - Automate Cellulaire</title>
+    <title>L'Univers des Automates Cellulaires</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --bg: #101014;
+            --panel: #1b1b22;
+            --text: #dce0e6;
+            --text-dim: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #79c0ff;
+            --accent-green: #2ea043;
+            --border: #30363d;
+            --danger: #f85149;
         }
-
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
+            margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg); color: var(--text);
+            display: flex; height: 100vh; overflow: hidden;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            padding: 20px 0;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .game-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .grid-container {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .controls {
-            width: 300px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .grid {
-            display: grid;
-            gap: 1px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            overflow: hidden;
-            margin: 0 auto;
-            max-width: 800px;
-        }
-
-        .cell {
-            aspect-ratio: 1;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: all 0.1s ease;
-        }
-
-        .cell.alive {
-            background-color: #4CAF50;
-            box-shadow: 0 0 8px rgba(76, 175, 80, 0.7);
-        }
-
-        .controls h2 {
-            margin-bottom: 20px;
-            text-align: center;
-            color: #4CAF50;
-        }
-
-        .control-group {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-
-        .control-group h3 {
-            margin-bottom: 15px;
-            color: #FFC107;
-        }
-
-        .slider-container {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #4CAF50;
-            cursor: pointer;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
-
-        .value-display {
-            text-align: right;
-            font-weight: bold;
-            color: #FFC107;
-        }
-
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            background: linear-gradient(45deg, #4CAF50, #2E7D32);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .btn-stop {
-            background: linear-gradient(45deg, #f44336, #d32f2f);
-        }
-
-        .btn-random {
-            background: linear-gradient(45deg, #2196F3, #0D47A1);
-        }
-
-        .pattern-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .pattern-btn {
-            padding: 8px 12px;
-            font-size: 0.8rem;
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .pattern-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-
-        .stats {
-            text-align: center;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-        }
-
-        .stats p {
-            margin: 5px 0;
-            font-size: 1.1rem;
-        }
-
-        .stats span {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
-        .examples {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-
-        .examples h3 {
-            margin-bottom: 15px;
-            color: #FFC107;
-        }
-
-        .examples-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-        }
-
-        .example-item {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .example-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
-        .example-item h4 {
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-
-        .example-item p {
-            font-size: 0.7rem;
-            opacity: 0.8;
-        }
-
-        @media (max-width: 768px) {
-            .game-container {
-                flex-direction: column;
-            }
-            
-            .controls {
-                width: 100%;
-            }
-
-        /* --- RESPONSIVE MOBILE FIX --- */
-    @media (max-width: 800px) {
-        body {
-            /* Permet l'empilement vertical */
-            flex-direction: column; 
-            height: auto;
-            overflow-y: auto;
-        }
-
+        /* --- SIDEBAR --- */
         #sidebar {
-            /* La barre latérale prend toute la largeur en haut */
-            width: 100%; 
-            border-right: none;
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            width: 380px; background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+            z-index: 10;
         }
+        .scroll-content { padding: 20px; overflow-y: auto; flex: 1; }
+
+        h1 { color: var(--accent); margin: 0 0 5px 0; font-size: 1.5rem; letter-spacing: -0.5px; }
+        .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 20px; display: block; }
         
-        .scroll-content {
-            /* Assure que la barre latérale n'est pas trop haute */
-            max-height: 80vh; 
-            overflow-y: auto;
-            padding-bottom: 100px; /* Espace pour le scroll sur mobile */
+        h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-top: 25px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+
+        /* Controls */
+        .btn-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        button {
+            flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px;
+            background: #21262d; color: var(--text); cursor: pointer; font-weight: 600;
+            transition: all 0.2s;
+        }
+        button:hover { background: #30363d; border-color: #8b949e; }
+        button.active { background: var(--accent); color: #0d1117; border-color: var(--accent); }
+        button.danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+        select, input[type="range"] {
+            width: 100%; padding: 8px; margin-bottom: 8px;
+            background: #0d1117; border: 1px solid var(--border); color: white; border-radius: 4px;
         }
 
+        /* Info Box */
+        #info-panel {
+            background: #161b22; padding: 15px; border-radius: 6px;
+            border-left: 4px solid var(--accent); margin-top: 15px;
+        }
+        #info-title { font-weight: bold; color: var(--accent); display: block; margin-bottom: 5px; }
+        #info-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; }
+
+        /* --- GRAPHICS --- */
+        #graph-container {
+            background: #000; border: 1px solid var(--border);
+            height: 120px; width: 100%; position: relative;
+            margin-top: 20px; border-radius: 6px; overflow: hidden;
+        }
+        #population-graph { display: block; width: 100%; height: 100%; }
+        
+        .graph-label {
+            position: absolute; font-size: 10px; font-family: monospace; 
+            color: var(--accent-green); pointer-events: none;
+            text-shadow: 0 1px 2px black;
+        }
+        #lbl-max { top: 4px; left: 4px; }
+        #lbl-min { bottom: 4px; left: 4px; }
+        #lbl-cur { 
+            top: 4px; right: 4px; 
+            font-weight: bold; color: #fff; 
+            background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px;
+        }
+
+        /* --- VIEWPORT --- */
         #viewport {
-            width: 100%;
-            /* Garantit que le viewport est toujours visible en bas */
-            min-height: 450px; 
-            height: 100vw; /* Astuce : hauteur égale à la largeur pour un damier */
+            flex: 1; position: relative; background: #050505;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
         }
         
+        /* Cadre décoratif autour du canvas */
         #canvas-wrapper {
-            box-shadow: none; /* Simplifier l'apparence sur mobile */
+            border: 1px solid #333;
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
+            background: #000;
         }
-        
+        canvas#grid { display: block; image-rendering: pixelated; }
+
         .hud {
-            bottom: 10px; right: 10px;
-            padding: 8px 12px;
-        }
-    }
-
-
-
-
+            position: absolute; bottom: 20px; right: 20px;
+            background: rgba(22, 27, 34, 0.9); padding: 10px 15px;
+            border-radius: 20px; border: 1px solid var(--border);
+            font-family: 'Courier New', monospace; font-size: 0.9rem;
+            pointer-events: none; user-select: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Jeux de Conway</h1>
-            <p class="subtitle">Automate cellulaire avec des patterns complexes et interactifs</p>
-        </header>
 
-        <div class="game-container">
-            <div class="grid-container">
-                <div class="grid" id="gameGrid"></div>
-            </div>
+<div id="sidebar">
+    <div class="scroll-content">
+        <h1>Cellularium</h1>
+        <span class="subtitle">Explorateur d'Automates Cellulaires</span>
 
-            <div class="controls">
-                <h2>Contrôles</h2>
-                
-                <div class="control-group">
-                    <h3>Paramètres de Grille</h3>
-                    <div class="slider-container">
-                        <label for="gridWidth">Largeur de la grille:</label>
-                        <input type="range" id="gridWidth" min="10" max="100" value="50">
-                        <div class="value-display"><span id="widthValue">50</span> cellules</div>
-                    </div>
-                    
-                    <div class="slider-container">
-                        <label for="gridHeight">Hauteur de la grille:</label>
-                        <input type="range" id="gridHeight" min="10" max="100" value="50">
-                        <div class="value-display"><span id="heightValue">50</span> cellules</div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <h3>Paramètres de Simulation</h3>
-                    <div class="slider-container">
-                        <label for="speed">Vitesse de simulation:</label>
-                        <input type="range" id="speed" min="10" max="500" value="100">
-                        <div class="value-display"><span id="speedValue">100</span> ms/itération</div>
-                    </div>
-                    
-                    <div class="slider-container">
-                        <label for="density">Densité de cellules:</label>
-                        <input type="range" id="density" min="1" max="50" value="20">
-                        <div class="value-display"><span id="densityValue">20</span>%</div>
-                    </div>
-                </div>
-
-                <div class="buttons">
-                    <button id="startBtn" class="btn-start">Démarrer</button>
-                    <button id="stopBtn" class="btn-stop">Arrêter</button>
-                    <button id="randomBtn" class="btn-random">Aléatoire</button>
-                    <button id="resetBtn" class="btn-stop">Réinitialiser</button>
-                </div>
-
-                <div class="control-group">
-                    <h3>Patterns Prédéfinis</h3>
-                    <div class="pattern-buttons">
-                        <button class="pattern-btn" data-pattern="blinker">Blinker</button>
-                        <button class="pattern-btn" data-pattern="pulsar">Pulsar</button>
-                        <button class="pattern-btn" data-pattern="glider">Glider</button>
-                        <button class="pattern-btn" data-pattern="spaceship">Spaceship</button>
-                        <button class="pattern-btn" data-pattern="toad">Toad</button>
-                        <button class="pattern-btn" data-pattern="beacon">Beacon</button>
-                    </div>
-                </div>
-
-                <div class="stats">
-                    <p>Étapes: <span id="stepCount">0</span></p>
-                    <p>Cellules vivantes: <span id="aliveCount">0</span></p>
-                </div>
-
-                <div class="examples">
-                    <h3>Exemples de Patterns</h3>
-                    <div class="examples-grid" id="examplesContainer">
-                        <!-- Les exemples seront ajoutés dynamiquement -->
-                    </div>
-                </div>
-            </div>
+        <div class="btn-row">
+            <button id="btn-play">▶ Lecture</button>
+            <button id="btn-step">⏯ Pas</button>
+            <button id="btn-clear" class="danger">🗑 Reset</button>
         </div>
+
+        <h2>1. Règle de l'Univers</h2>
+        <select id="select-rule"></select> 
+        
+        <h2>2. Insérer une Forme</h2>
+        <select id="select-pattern">
+            <option value="">-- Choisir --</option>
+        </select> 
+        
+        <div id="info-panel">
+            <span id="info-title">Bienvenue</span>
+            <span id="info-desc">Sélectionnez une règle et une structure pour commencer. Utilisez la souris pour dessiner ou modifier l'état des cellules.</span>
+        </div>
+
+        <div id="graph-container">
+            <canvas id="population-graph"></canvas>
+            <div id="lbl-max" class="graph-label">Max: 0</div>
+            <div id="lbl-min" class="graph-label">Min: 0</div>
+            <div id="lbl-cur" class="graph-label">0</div>
+        </div>
+
+        <h2>Paramètres</h2>
+        <label>Vitesse de simulation</label>
+        <input type="range" id="range-speed" min="1" max="60" value="30">
+        
+        <label>Zoom / Taille grille</label>
+        <input type="range" id="range-zoom" min="2" max="40" value="8">
+
+        <label>Bruit Aléatoire</label>
+        <div class="btn-row">
+            <input type="range" id="range-density" min="5" max="50" value="20">
+            <button id="btn-random" style="flex:0 0 40px;">🎲</button>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:10px; margin-top:10px; cursor:pointer;">
+            <input type="checkbox" id="chk-wrap" checked>
+            Monde Torique (Bords reliés)
+        </label>
+        <small style="color:#666;">Si désactivé, le monde est fini et bordé de murs.</small>
     </div>
+</div>
 
-    <script>
-        // Initialisation du jeu dès que le DOM est chargé
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("Initialisation du jeu de Conway...");
+<div id="viewport">
+    <div id="canvas-wrapper">
+        <canvas id="grid"></canvas>
+    </div>
+    <div class="hud">
+        Génération: <span id="lbl-gen" style="color:var(--accent)">0</span> | 
+        Pop: <span id="lbl-pop">0</span>
+    </div>
+</div>
+
+<script>
+/* --- CONFIGURATION ET DONNÉES --- */
+
+const RULES = {
+    // --- FAMILLE LIFE (2 états) ---
+    "life": {
+        name: "Conway's Life", type: "life", states: 2,
+        B: [3], S: [2,3],
+        colors: ['#000000', '#58a6ff'],
+        desc: "<b>Le classique (1970).</b> <br>Une cellule naît avec 3 voisins, survit avec 2 ou 3. Un équilibre parfait entre ordre et chaos, permettant des machines de Turing universelles."
+    },
+    "highlife": {
+        name: "HighLife", type: "life", states: 2,
+        B: [3,6], S: [2,3],
+        colors: ['#000000', '#d2a8ff'],
+        desc: "Similaire à Life, mais une cellule naît aussi avec 6 voisins. Connu pour son <b>Replicator</b>, une structure qui se clone elle-même."
+    },
+    "daynight": {
+        name: "Day & Night", type: "life", states: 2,
+        B: [3,6,7,8], S: [3,4,6,7,8],
+        colors: ['#000000', '#ffa657'],
+        desc: "Une règle symétrique : les zones mortes agissent comme les vivantes. Possède des vaisseaux très complexes."
+    },
+    "morley": {
+        name: "Morley (Move)", type: "life", states: 2,
+        B: [3,6,8], S: [2,4,5],
+        colors: ['#000000', '#ff7b72'],
+        desc: "Connu pour ses vaisseaux appelés 'Ships' qui laissent beaucoup de débris derrière eux."
+    },
+    
+    // --- FAMILLE GENERATIONS (Multi-états, vieillissement) ---
+    "brain": {
+        name: "Brian's Brain", type: "gens", states: 3,
+        B: [2], S: [], 
+        colors: ['#000000', '#7ee787', '#ff7b72'], // Vivant (Vert) -> Mourant (Rouge) -> Mort
+        desc: "Imite les neurones. 3 états : Prêt > Actif > Réfractaire. Crée de nombreux vaisseaux et oscillateurs."
+    },
+    "starwars": {
+        name: "Star Wars", type: "gens", states: 4,
+        B: [2], S: [3,4,5],
+        colors: ['#000000', '#79c0ff', '#1f6feb', '#ff7b72'],
+        desc: "Règle très vivante où les structures ressemblent à des flottes de vaisseaux spatiaux en combat."
+    },
+    "belzhab": {
+        name: "BelZhab Sediment", type: "gens", states: 8,
+        B: [2,3], S: [2,3],
+        colors: "gradient-blue",
+        desc: "Une règle qui tend à laisser des structures cristallines fossilisées (sédiments) derrière l'activité."
+    },
+
+    // --- FAMILLE ELECTRONIQUE ---
+    "wireworld": {
+        name: "WireWorld", type: "wire", states: 4,
+        colors: ['#101010', '#ffffff', '#ff5555', '#ffcc00'], // Vide, Tête, Queue, Cuivre
+        desc: "Simulation électronique. <br>Jaune = Câble, Blanc = Électron (Tête), Rouge = Queue.<br>Permet de créer des portes logiques et des ordinateurs."
+    }
+};
+
+const PATTERNS = [
+    // --- CLASSICS ---
+    { id: "glider", name: "Planeur (Glider)", cat: "Classique", rule: "life", desc: "Le plus petit vaisseau. Il se déplace en diagonale.", coords: [[1,0],[2,1],[0,2],[1,2],[2,2]] },
+    { id: "pentadecathlon", name: "Pentadecathlon", cat: "Classique", rule: "life", desc: "Oscillateur de période 15. Découvert par Conway en 1970.", coords: [[0,0],[1,0], /*GAP*/ [3,0],[4,0],[5,0],[6,0], /*GAP*/ [8,0],[9,0], [2,-1],[7,-1], [2,1],[7,1]] },
+    { id: "pulsar", name: "Pulsar", cat: "Classique", rule: "life", desc: "Oscillateur de période 3 très commun.", coords: [[2,0],[3,0],[4,0],[8,0],[9,0],[10,0], [0,2],[5,2],[7,2],[12,2], [0,3],[5,3],[7,3],[12,3], [0,4],[5,4],[7,4],[12,4], [2,5],[3,5],[4,5],[8,5],[9,5],[10,5], /*Symétrie non complète pour brièveté*/] },
+
+    // --- MATHUSALEMS ---
+    { id: "r-pentomino", name: "R-Pentomino", cat: "Chaos", rule: "life", desc: "Seulement 5 cellules, mais met 1103 générations à se stabiliser. Le père du chaos dans Life.", coords: [[1,0],[2,0],[0,1],[1,1],[1,2]] },
+    { id: "diehard", name: "Diehard", cat: "Chaos", rule: "life", desc: "Disparaît complètement après 130 générations. Son nom signifie 'Dur à cuire'.", coords: [[6,0], [0,1],[1,1], [1,2],[5,2],[6,2],[7,2]] },
+    { id: "acorn", name: "Acorn (Gland)", cat: "Chaos", rule: "life", desc: "Produit 13 planeurs et dure 5206 générations.", coords: [[1,0], [3,1], [0,2],[1,2], [4,2],[5,2],[6,2]] },
+
+    // --- COMPLEXE ---
+    { id: "gosper", name: "Gosper Glider Gun", cat: "Canons & Vaisseaux", rule: "life", desc: "La première structure produisant des vaisseaux à l'infini. Prouve que la population peut croître indéfiniment.", coords: [[24,0],[22,1],[24,1],[12,2],[13,2],[20,2],[21,2],[34,2],[35,2],[11,3],[15,3],[20,3],[21,3],[34,3],[35,3],[0,4],[1,4],[10,4],[16,4],[20,4],[21,4],[0,5],[1,5],[10,5],[14,5],[16,5],[17,5],[22,5],[24,5],[10,6],[16,6],[24,6],[11,7],[15,7],[12,8],[13,8]] },
+    { id: "puffer1", name: "Puffer Train", cat: "Canons & Vaisseaux", rule: "life", desc: "Un vaisseau qui laisse une traînée de débris derrière lui en avançant.", coords: [[1,0],[2,0],[3,0],[10,0],[11,0],[12,0],[13,0], [0,1],[4,1],[9,1],[13,1], [4,2],[13,2], [0,3],[3,3],[9,3],[12,3]] },
+    
+    // --- VARIANTES ---
+    { id: "replicator", name: "Le Replicator", cat: "HighLife", rule: "highlife", desc: "Spécifique à HighLife. Cette structure se copie elle-même horizontalement tous les 12 pas.", coords: [[2,0],[3,0],[4,0], [1,1],[4,1], [0,2],[4,2], [0,3],[3,3], [0,4],[1,4],[2,4]] },
+    { id: "rocket", name: "Rocket", cat: "Day & Night", rule: "daynight", desc: "Un vaisseau rapide spécifique à la règle Day & Night.", coords: [[4,0], [0,1],[1,1],[2,1],[4,1], [0,2],[1,2],[2,2],[3,2], [4,3]] },
+
+    // --- GENERATIONS ---
+    { id: "butterfly", name: "Butterfly", cat: "Generations", rule: "brain", desc: "Brian's Brain. Ce vaisseau ressemble à un papillon battant des ailes.", coords: [[1,0,1],[2,0,2], [0,1,2],[1,1,2],[2,1,1],[3,1,2], [1,2,2],[2,2,2],[3,2,1]] },
+    { id: "meteor", name: "Meteor", cat: "Generations", rule: "starwars", desc: "Vaisseau typique de Star Wars laissant une traînée.", coords: [[0,0,1],[1,0,1],[2,0,1],[3,0,1], [0,1,1],[3,1,1], [0,2,1],[3,2,1], [1,3,1],[2,3,1]] },
+
+    // --- WIREWORLD ---
+    { id: "logic", name: "Diode & Signal", cat: "Électronique", rule: "wireworld", desc: "Démonstration de WireWorld. Le signal (blanc/rouge) circule dans le fil (jaune) mais est bloqué par la diode.", coords: [
+        [0,5,3],[1,5,3],[2,5,3],[3,5,3],[4,5,3],[5,5,3],[6,5,3],[7,5,3],[8,5,3],[9,5,3],[10,5,3],
+        [1,5,1],[0,5,2],
+        [6,4,3],[7,4,3], [6,6,3],[7,6,3], [8,5,3]
+    ] }
+];
+
+/* --- MOTEUR --- */
+const canvas = document.getElementById('grid');
+const ctx = canvas.getContext('2d', { alpha: false });
+const wrapper = document.getElementById('canvas-wrapper');
+
+let config = {
+    cellSize: 8,
+    speed: 30,
+    wrap: true,
+    cols: 0, rows: 0
+};
+
+let grid = [];
+let nextGrid = [];
+let isPlaying = false;
+let animationId;
+let lastTime = 0;
+let generation = 0;
+let currentRule = RULES.life;
+
+// Variables pour le graphique
+const graphCanvas = document.getElementById('population-graph');
+const graphCtx = graphCanvas.getContext('2d');
+let populationHistory = [];
+const MAX_HISTORY_POINTS = 200; 
+
+// Variable de lissage du graphique
+let smoothedMax = 10;
+let smoothedMin = 0;
+
+// Initialisation UI
+const ruleSelect = document.getElementById('select-rule');
+Object.keys(RULES).forEach(key => {
+    let opt = document.createElement('option');
+    opt.value = key; opt.textContent = RULES[key].name;
+    ruleSelect.appendChild(opt);
+});
+
+const patSelect = document.getElementById('select-pattern');
+let lastCat = "";
+PATTERNS.forEach(p => {
+    if(p.cat !== lastCat) {
+        let g = document.createElement('optgroup'); g.label = p.cat; patSelect.appendChild(g); lastCat = p.cat;
+    }
+    let opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name;
+    patSelect.lastChild.appendChild(opt);
+});
+
+// --- LOGIQUE ---
+
+function getIdx(x, y) {
+    if (config.wrap) {
+        x = (x + config.cols) % config.cols;
+        y = (y + config.rows) % config.rows;
+    } else {
+        if (x < 0 || x >= config.cols || y < 0 || y >= config.rows) return -1;
+    }
+    return y * config.cols + x;
+}
+
+function countNeighbors(x, y, type) {
+    let n = 0;
+    // Voisinage de Moore (8)
+    for(let dy=-1; dy<=1; dy++) {
+        for(let dx=-1; dx<=1; dx++) {
+            if(!dx && !dy) continue;
+            const idx = getIdx(x+dx, y+dy);
+            if(idx === -1) continue;
             
-            // Vérification que les éléments existent
-            const gameGrid = document.getElementById('gameGrid');
-            if (!gameGrid) {
-                console.error("Élément gameGrid non trouvé");
-                return;
+            const val = grid[idx];
+            if (type === 'life' || type === 'gens') {
+                if (val === 1) n++;
+            } else if (type === 'wire') {
+                if (val === 1) n++; 
             }
+        }
+    }
+    return n;
+}
 
-            // Déclaration des variables globales
-            let grid = [];
-            let nextGrid = [];
-            let isRunning = false;
-            let animationId = null;
-            let stepCount = 0;
-            let aliveCells = 0;
-            let gridWidth = 50;
-            let gridHeight = 50;
-            let speed = 100;
-            let density = 20;
+function update() {
+    let active = 0;
+    
+    for (let y=0; y<config.rows; y++) {
+        for (let x=0; x<config.cols; x++) {
+            const idx = y * config.cols + x;
+            const s = grid[idx];
+            let ns = 0;
 
-            // Mise à jour des éléments
-            const widthValue = document.getElementById('widthValue');
-            const heightValue = document.getElementById('heightValue');
-            const speedValue = document.getElementById('speedValue');
-            const densityValue = document.getElementById('densityValue');
-            const stepCountElement = document.getElementById('stepCount');
-            const aliveCountElement = document.getElementById('aliveCount');
-
-            // Fonction pour créer la grille
-            function createGrid() {
-                grid = [];
-                for (let i = 0; i < gridHeight; i++) {
-                    grid[i] = [];
-                    for (let j = 0; j < gridWidth; j++) {
-                        grid[i][j] = false;
-                    }
-                }
-                nextGrid = JSON.parse(JSON.stringify(grid));
-            }
-
-            // Fonction pour afficher la grille
-            function renderGrid() {
-                gameGrid.innerHTML = '';
-                gameGrid.style.gridTemplateColumns = `repeat(${gridWidth}, 1fr)`;
-
-                for (let i = 0; i < gridHeight; i++) {
-                    for (let j = 0; j < gridWidth; j++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'cell';
-                        if (grid[i][j]) {
-                            cell.classList.add('alive');
-                        }
-                        cell.dataset.row = i;
-                        cell.dataset.col = j;
-                        gameGrid.appendChild(cell);
-                    }
-                }
-            }
-
-            // Gestion des événements
-            function setupEventListeners() {
-                // Contrôles de la grille
-                document.getElementById('gridWidth').addEventListener('input', function(e) {
-                    gridWidth = parseInt(e.target.value);
-                    widthValue.textContent = gridWidth;
-                    createGrid();
-                    renderGrid();
-                });
-
-                document.getElementById('gridHeight').addEventListener('input', function(e) {
-                    gridHeight = parseInt(e.target.value);
-                    heightValue.textContent = gridHeight;
-                    createGrid();
-                    renderGrid();
-                });
-
-                // Vitesse et densité
-                document.getElementById('speed').addEventListener('input', function(e) {
-                    speed = parseInt(e.target.value);
-                    speedValue.textContent = speed;
-                });
-
-                document.getElementById('density').addEventListener('input', function(e) {
-                    density = parseInt(e.target.value);
-                    densityValue.textContent = density;
-                });
-
-                // Boutons de contrôle
-                document.getElementById('startBtn').addEventListener('click', startSimulation);
-                document.getElementById('stopBtn').addEventListener('click', stopSimulation);
-                document.getElementById('randomBtn').addEventListener('click', generateRandom);
-                document.getElementById('resetBtn').addEventListener('click', resetSimulation);
-
-                // Patterns prédéfinis
-                document.querySelectorAll('.pattern-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        const pattern = e.target.dataset.pattern;
-                        loadPattern(pattern);
-                    });
-                });
-
-                // Clic sur les cellules pour les activer/désactiver
-                gameGrid.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('cell')) {
-                        const row = parseInt(e.target.dataset.row);
-                        const col = parseInt(e.target.dataset.col);
-                        toggleCell(row, col);
-                    }
-                });
-            }
-
-            // Fonction pour basculer une cellule
-            function toggleCell(row, col) {
-                if (isRunning) return;
-                grid[row][col] = !grid[row][col];
-                updateCellDisplay(row, col);
-                updateStats();
-            }
-
-            // Mise à jour de l'affichage d'une cellule
-            function updateCellDisplay(row, col) {
-                const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-                if (grid[row][col]) {
-                    cell.classList.add('alive');
+            if (currentRule.type === 'life') {
+                const n = countNeighbors(x, y, 'life');
+                if (s === 1) ns = currentRule.S.includes(n) ? 1 : 0;
+                else ns = currentRule.B.includes(n) ? 1 : 0;
+            
+            } else if (currentRule.type === 'gens') {
+                if (s === 0) {
+                    const n = countNeighbors(x, y, 'gens');
+                    ns = currentRule.B.includes(n) ? 1 : 0;
+                } else if (s === 1) {
+                    const n = countNeighbors(x, y, 'gens');
+                    if (currentRule.S.includes(n)) ns = 1;
+                    else ns = 2;
                 } else {
-                    cell.classList.remove('alive');
+                    ns = (s + 1);
+                    if (ns >= currentRule.states) ns = 0;
                 }
-            }
-
-            // Mise à jour des statistiques
-            function updateStats() {
-                let count = 0;
-                for (let i = 0; i < gridHeight; i++) {
-                    for (let j = 0; j < gridWidth; j++) {
-                        if (grid[i][j]) count++;
-                    }
-                }
-                aliveCountElement.textContent = count;
-            }
-
-            // Génération aléatoire
-            function generateRandom() {
-                if (isRunning) return;
-                clearGrid();
-                const cellCount = Math.floor((gridWidth * gridHeight * density) / 100);
-                for (let i = 0; i < cellCount; i++) {
-                    const row = Math.floor(Math.random() * gridHeight);
-                    const col = Math.floor(Math.random() * gridWidth);
-                    grid[row][col] = true;
-                }
-                renderGrid();
-                updateStats();
-            }
-
-            // Effacement de la grille
-            function clearGrid() {
-                for (let i = 0; i < gridHeight; i++) {
-                    for (let j = 0; j < gridWidth; j++) {
-                        grid[i][j] = false;
-                    }
-                }
-                renderGrid();
-                stepCount = 0;
-                updateStats();
-            }
-
-            // Réinitialisation
-            function resetSimulation() {
-                stopSimulation();
-                clearGrid();
-                stepCount = 0;
-                stepCountElement.textContent = '0';
-            }
-
-            // Démarrage de la simulation
-            function startSimulation() {
-                if (isRunning) return;
-                isRunning = true;
-                step();
-            }
-
-            // Arrêt de la simulation
-            function stopSimulation() {
-                isRunning = false;
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
-                }
-            }
-
-            // Étape de simulation
-            function step() {
-                if (!isRunning) return;
-
-                // Calculer l'état suivant
-                nextGrid = JSON.parse(JSON.stringify(grid));
-                
-                for (let i = 0; i < gridHeight; i++) {
-                    for (let j = 0; j < gridWidth; j++) {
-                        const neighbors = countNeighbors(i, j);
-                        
-                        if (grid[i][j]) {
-                            // Cellule vivante
-                            if (neighbors < 2 || neighbors > 3) {
-                                nextGrid[i][j] = false;
-                            }
-                        } else {
-                            // Cellule morte
-                            if (neighbors === 3) {
-                                nextGrid[i][j] = true;
-                            }
-                        }
-                    }
-                }
-
-                // Appliquer le nouveau état
-                grid = nextGrid;
-                stepCount++;
-                updateStats();
-                stepCountElement.textContent = stepCount;
-                
-                renderGrid();
-
-                // Programmation de la prochaine étape
-                animationId = requestAnimationFrame(() => {
-                    setTimeout(() => step(), speed);
-                });
-            }
-
-            // Comptage des voisins
-            function countNeighbors(row, col) {
-                let count = 0;
-                for (let i = -1; i <= 1; i++) {
-                    for (let j = -1; j <= 1; j++) {
-                        if (i === 0 && j === 0) continue;
-                        
-                        const newRow = (row + i + gridHeight) % gridHeight;
-                        const newCol = (col + j + gridWidth) % gridWidth;
-                        
-                        if (grid[newRow][newCol]) {
-                            count++;
-                        }
-                    }
-                }
-                return count;
-            }
-
-            // Chargement d'un pattern prédéfini
-            function loadPattern(pattern) {
-                clearGrid();
-                
-                const centerX = Math.floor(gridWidth / 2);
-                const centerY = Math.floor(gridHeight / 2);
-
-                switch (pattern) {
-                    case 'blinker':
-                        setCell(centerY, centerX - 1, true);
-                        setCell(centerY, centerX, true);
-                        setCell(centerY, centerX + 1, true);
-                        break;
-
-                    case 'pulsar':
-                        const pulsarCoords = [
-                            [2, 4], [2, 5], [2, 6], [2, 10], [2, 11], [2, 12],
-                            [4, 2], [4, 7], [4, 9], [4, 14],
-                            [5, 2], [5, 7], [5, 9], [5, 14],
-                            [6, 2], [6, 7], [6, 9], [6, 14],
-                            [7, 4], [7, 5], [7, 6], [7, 10], [7, 11], [7, 12],
-                            [9, 4], [9, 5], [9, 6], [9, 10], [9, 11], [9, 12],
-                            [10, 2], [10, 7], [10, 9], [10, 14],
-                            [11, 2], [11, 7], [11, 9], [11, 14],
-                            [12, 2], [12, 7], [12, 9], [12, 14],
-                            [14, 4], [14, 5], [14, 6], [14, 10], [14, 11], [14, 12]
-                        ];
-                        pulsarCoords.forEach(([y, x]) => {
-                            setCell(centerY - 7 + y, centerX - 7 + x, true);
-                        });
-                        break;
-
-                    case 'glider':
-                        setCell(centerY - 1, centerX, true);
-                        setCell(centerY, centerX + 1, true);
-                        setCell(centerY + 1, centerX - 1, true);
-                        setCell(centerY + 1, centerX, true);
-                        setCell(centerY + 1, centerX + 1, true);
-                        break;
-
-                    case 'spaceship':
-                        setCell(centerY, centerX, true);
-                        setCell(centerY, centerX + 1, true);
-                        setCell(centerY, centerX + 2, true);
-                        setCell(centerY, centerX + 3, true);
-                        setCell(centerY + 1, centerX + 3, true);
-                        setCell(centerY + 2, centerX + 3, true);
-                        setCell(centerY + 3, centerX + 2, true);
-                        setCell(centerY + 3, centerX + 1, true);
-                        setCell(centerY + 3, centerX, true);
-                        break;
-
-                    case 'toad':
-                        setCell(centerY, centerX, true);
-                        setCell(centerY, centerX + 1, true);
-                        setCell(centerY, centerX + 2, true);
-                        setCell(centerY + 1, centerX - 1, true);
-                        setCell(centerY + 1, centerX, true);
-                        setCell(centerY + 1, centerX + 1, true);
-                        break;
-
-                    case 'beacon':
-                        setCell(centerY - 1, centerX - 1, true);
-                        setCell(centerY - 1, centerX, true);
-                        setCell(centerY, centerX - 1, true);
-                        setCell(centerY, centerX, true);
-                        setCell(centerY + 1, centerX + 1, true);
-                        setCell(centerY + 1, centerX + 2, true);
-                        setCell(centerY + 2, centerX + 1, true);
-                        setCell(centerY + 2, centerX + 2, true);
-                        break;
-                }
-
-                renderGrid();
-                updateStats();
-            }
-
-            // Définition d'une cellule
-            function setCell(row, col, alive) {
-                if (row >= 0 && row < gridHeight && col >= 0 && col < gridWidth) {
-                    grid[row][col] = alive;
-                }
-            }
-
-            // Remplir les exemples
-            function populateExamples() {
-                const examples = [
-                    { name: "Blinker", period: "2", type: "Stable" },
-                    { name: "Pulsar", period: "3", type: "Oscillator" },
-                    { name: "Glider", period: "4", type: "Spaceship" },
-                    { name: "Toad", period: "2", type: "Stable" },
-                    { name: "Beacon", period: "2", type: "Oscillator" },
-                    { name: "Spaceship", period: "4", type: "Spaceship" }
-                ];
-
-                const container = document.getElementById('examplesContainer');
-                if (!container) return;
-
-                container.innerHTML = '';
-
-                examples.forEach(example => {
-                    const div = document.createElement('div');
-                    div.className = 'example-item';
-                    div.innerHTML = `
-                        <h4>${example.name}</h4>
-                        <p>Period: ${example.period}</p>
-                        <p>${example.type}</p>
-                    `;
-                    div.addEventListener('click', function() {
-                        loadPattern(example.name.toLowerCase().replace(/\s+/g, ''));
-                    });
-                    container.appendChild(div);
-                });
-            }
-
-            // Initialisation complète
-            createGrid();
-            renderGrid();
-            setupEventListeners();
-            populateExamples();
             
-            console.log("Jeu de Conway initialisé avec succès");
-        });
-    </script>
+            } else if (currentRule.type === 'wire') {
+                if (s === 1) ns = 2;
+                else if (s === 2) ns = 3;
+                else if (s === 3) {
+                    const n = countNeighbors(x, y, 'wire');
+                    ns = (n === 1 || n === 2) ? 1 : 3;
+                } else ns = 0;
+            }
+
+            nextGrid[idx] = ns;
+            if(ns === 1) active++;
+        }
+    }
+
+    [grid, nextGrid] = [nextGrid, grid];
+    generation++;
+    document.getElementById('lbl-gen').innerText = generation;
+    document.getElementById('lbl-pop').innerText = active;
+    
+    populationHistory.push(active);
+    if (populationHistory.length > MAX_HISTORY_POINTS) {
+        populationHistory.shift();
+    }
+    
+    updateGraph();
+}
+
+// --- RENDU ---
+function getColor(state, rule) {
+    if(state === 0) return rule.colors[0];
+    if(rule.colors === "gradient-blue") {
+         return `hsl(210, 100%, ${50 + (state/rule.states)*40}%)`;
+    }
+    if(rule.colors[state]) return rule.colors[state];
+    return '#fff';
+}
+
+function draw() {
+    ctx.fillStyle = currentRule.colors[0];
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const sz = config.cellSize;
+    const pad = sz > 4 ? 1 : 0; 
+
+    for(let y=0; y<config.rows; y++) {
+        for(let x=0; x<config.cols; x++) {
+            const s = grid[y*config.cols + x];
+            if (s > 0) {
+                ctx.fillStyle = getColor(s, currentRule);
+                ctx.fillRect(x*sz, y*sz, sz-pad, sz-pad);
+            }
+        }
+    }
+}
+
+// --- GRAPHIQUE DE POPULATION (LISSÉ) ---
+function updateGraph() {
+    const w = graphCanvas.width = graphCanvas.clientWidth;
+    const h = graphCanvas.height = graphCanvas.clientHeight;
+    
+    graphCtx.clearRect(0, 0, w, h);
+
+    if(populationHistory.length === 0) return;
+
+    // 1. Calculer les cibles (vrai Max et vrai Min)
+    let targetMax = Math.max(...populationHistory, 10);
+    let targetMin = Math.min(...populationHistory);
+    targetMax = targetMax * 1.1; // Padding haut
+
+    // 2. Lissage (Interpolation linéaire)
+    // On déplace smoothedMax de 10% vers la cible à chaque frame
+    // Si la cible est BEAUCOUP plus grande (explosion de pop), on y va plus vite
+    if (targetMax > smoothedMax) {
+        smoothedMax += (targetMax - smoothedMax) * 0.2; // Montée assez rapide
+    } else {
+        smoothedMax += (targetMax - smoothedMax) * 0.05; // Descente lente
+    }
+    
+    smoothedMin += (targetMin - smoothedMin) * 0.1;
+
+    // Mise à jour des labels
+    document.getElementById('lbl-max').innerText = "Max: " + Math.round(smoothedMax);
+    document.getElementById('lbl-min').innerText = "Min: " + Math.round(smoothedMin);
+    const curVal = populationHistory[populationHistory.length-1];
+    document.getElementById('lbl-cur').innerText = curVal;
+
+    // Dessin
+    graphCtx.beginPath();
+    graphCtx.strokeStyle = '#2ea043';
+    graphCtx.lineWidth = 2;
+
+    const stepX = w / (MAX_HISTORY_POINTS - 1);
+    const range = smoothedMax - smoothedMin || 1;
+
+    for(let i=0; i<populationHistory.length; i++) {
+        const val = populationHistory[i];
+        // Formule de projection Y avec le lissage
+        const y = h - ((val - smoothedMin) / range) * h;
+        const x = i * stepX;
+        
+        if(i===0) graphCtx.moveTo(x, y);
+        else graphCtx.lineTo(x, y);
+    }
+    graphCtx.stroke();
+
+    graphCtx.lineTo((populationHistory.length-1)*stepX, h);
+    graphCtx.lineTo(0, h);
+    graphCtx.fillStyle = 'rgba(46, 160, 67, 0.2)';
+    graphCtx.fill();
+}
+
+// --- UTILS ---
+function resize() {
+    const rect = document.getElementById('viewport').getBoundingClientRect();
+    const w = Math.floor(rect.width - 40);
+    const h = Math.floor(rect.height - 40);
+    
+    canvas.width = w; canvas.height = h;
+    wrapper.style.width = w+"px"; wrapper.style.height = h+"px";
+
+    config.cols = Math.ceil(w / config.cellSize);
+    config.rows = Math.ceil(h / config.cellSize);
+    
+    grid = new Uint8Array(config.cols * config.rows);
+    nextGrid = new Uint8Array(config.cols * config.rows);
+    generation = 0;
+    
+    // Reset graph
+    populationHistory = [];
+    smoothedMax = 10; // Reset scale
+    updateGraph();
+    
+    draw();
+}
+
+function loop(t) {
+    if(isPlaying && (t - lastTime > 1000/config.speed)) {
+        update();
+        draw();
+        lastTime = t;
+    }
+    animationId = requestAnimationFrame(loop);
+}
+
+// --- EVENTS ---
+ruleSelect.addEventListener('change', (e) => {
+    currentRule = RULES[e.target.value];
+    document.getElementById('info-title').textContent = currentRule.name;
+    document.getElementById('info-desc').innerHTML = currentRule.desc;
+    grid.fill(0); 
+    generation = 0; 
+    document.getElementById('lbl-gen').innerText = '0';
+    document.getElementById('lbl-pop').innerText = '0';
+    populationHistory = []; 
+    smoothedMax = 10;
+    updateGraph();
+    draw();
+});
+
+patSelect.addEventListener('change', (e) => {
+    const pid = e.target.value;
+    if(!pid) return;
+    const p = PATTERNS.find(x => x.id === pid);
+    
+    if(p.rule && p.rule !== ruleSelect.value) {
+        ruleSelect.value = p.rule;
+        ruleSelect.dispatchEvent(new Event('change'));
+    }
+
+    document.getElementById('info-title').textContent = p.name;
+    document.getElementById('info-desc').textContent = p.desc;
+
+    grid.fill(0); 
+    generation = 0; 
+    document.getElementById('lbl-gen').innerText = '0';
+    document.getElementById('lbl-pop').innerText = '0';
+    populationHistory = []; 
+    smoothedMax = 10;
+    updateGraph();
+
+    const cx = Math.floor(config.cols/2);
+    const cy = Math.floor(config.rows/2);
+    
+    p.coords.forEach(([dx, dy, st]) => {
+        let idx = getIdx(cx+dx-5, cy+dy-5); 
+        if(idx !== -1) grid[idx] = st || 1;
+    });
+    draw();
+    patSelect.value = "";
+});
+
+// Mouse Painting
+let isDown = false;
+canvas.addEventListener('mousedown', () => isDown = true);
+window.addEventListener('mouseup', () => isDown = false);
+canvas.addEventListener('mousemove', (e) => { if(isDown) paint(e); });
+canvas.addEventListener('click', (e) => paint(e));
+
+function paint(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / config.cellSize);
+    const y = Math.floor((e.clientY - rect.top) / config.cellSize);
+    const idx = getIdx(x, y);
+    if(idx !== -1) {
+        if(currentRule.type === 'wire') {
+            grid[idx] = (grid[idx] === 3) ? 0 : 3; 
+        } else {
+            grid[idx] = (grid[idx] === 1) ? 0 : 1; 
+        }
+        draw();
+    }
+}
+
+// UI Buttons
+document.getElementById('btn-play').onclick = function() {
+    isPlaying = !isPlaying;
+    this.textContent = isPlaying ? "⏸ Pause" : "▶ Lecture";
+    this.classList.toggle('active');
+};
+document.getElementById('btn-step').onclick = () => { update(); draw(); };
+document.getElementById('btn-clear').onclick = () => { 
+    grid.fill(0); 
+    generation = 0; 
+    document.getElementById('lbl-gen').innerText = '0';
+    document.getElementById('lbl-pop').innerText = '0';
+    populationHistory = []; 
+    smoothedMax = 10;
+    updateGraph();
+    draw(); 
+};
+document.getElementById('btn-random').onclick = () => {
+    const d = document.getElementById('range-density').value / 100;
+    for(let i=0; i<grid.length; i++) {
+        if(currentRule.type === 'wire') {
+             grid[i] = Math.random() < d ? 3 : 0; 
+             if(grid[i] === 3 && Math.random() < 0.05) grid[i] = 1; 
+        } else {
+            grid[i] = Math.random() < d ? 1 : 0;
+        }
+    }
+    generation = 0; 
+    document.getElementById('lbl-gen').innerText = '0';
+    document.getElementById('lbl-pop').innerText = '0';
+    populationHistory = []; 
+    smoothedMax = 10;
+    updateGraph();
+    draw();
+};
+document.getElementById('range-speed').oninput = (e) => config.speed = e.target.value;
+document.getElementById('range-zoom').oninput = (e) => { config.cellSize = parseInt(e.target.value); resize(); };
+document.getElementById('chk-wrap').onchange = (e) => config.wrap = e.target.checked;
+
+// Start
+window.addEventListener('resize', resize);
+resize();
+ruleSelect.value = "life"; ruleSelect.dispatchEvent(new Event('change'));
+loop(0);
+
+</script>
 </body>
 </html>
