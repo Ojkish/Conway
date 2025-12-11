@@ -261,13 +261,17 @@
             opacity: 0.8;
         }
 
-      
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
             .controls {
                 width: 100%;
             }
 
         /* --- RESPONSIVE MOBILE FIX --- */
-        @media (max-width: 800px) {
+    @media (max-width: 800px) {
         body {
             /* Permet l'empilement vertical */
             flex-direction: column; 
